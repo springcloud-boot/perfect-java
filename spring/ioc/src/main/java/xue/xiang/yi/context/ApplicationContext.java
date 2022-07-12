@@ -5,12 +5,14 @@ import xue.xiang.yi.annotation.Component;
 import xue.xiang.yi.annotation.ComponentScan;
 
 import java.io.File;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -67,13 +69,37 @@ public class ApplicationContext {
         this.populateBean(bean, clazz);
         return bean;
     }
+
+    /**
+     * 支持无参数构造器, 和 有参数(必须使用component的注解对象)的构造器
+     * @param clazz
+     * @return
+     */
     private Object newInstance(Class<?> clazz){
-        try {
-        // 这里只支持默认构造器
-         return clazz.getDeclaredConstructor().newInstance();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        Constructor<?>[] declaredConstructors = clazz.getDeclaredConstructors();
+        for (Constructor<?> constructor : declaredConstructors) {
+            Class<?>[] parameterTypes = constructor.getParameterTypes();
+            if (parameterTypes.length  ==  0) {
+                try {
+                    return constructor.newInstance();
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            Object[] params = new Object[parameterTypes.length];
+            for (int i = 0; i < parameterTypes.length; i++) {
+                Class<?> parameterType = parameterTypes[i];
+                Object bean = getBean(parameterType);
+                params[i] = bean;
+            }
+            try {
+                return constructor.newInstance(params);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
         }
+
+        return null;
     }
     private void populateBean(Object bean, Class<?> clazz) throws IllegalAccessException {
         // 解析class信息，判断类中是否有需要进行依赖注入的字段
