@@ -42,7 +42,7 @@ public class ReentrantLockDemo {
 
 ## 3丶基础属性介绍
 
-```
+```java
 public abstract class AbstractQueuedSynchronizer
     extends AbstractOwnableSynchronizer
     implements java.io.Serializable {
@@ -138,9 +138,9 @@ static final class Node {
     }
 ```
 
-## 4丶由创建为入口,观察如何实现所
+## 4丶由创建为入口,观察如何实现 加锁
 
-```
+```java
 /**
  * 默认创建的为 非公平锁. 内部类Sync的2中实现之一
  */
@@ -149,7 +149,7 @@ public ReentrantLock() {
 }
 ```
 
-```
+```java
 static final class NonfairSync extends Sync {
     private static final long serialVersionUID = 7316153563782823691L;
 
@@ -175,7 +175,7 @@ static final class NonfairSync extends Sync {
 
 
 
-```
+```java
 //在AQS如下实现
 public final void acquire(int arg) {
 	//这里用了模板设计模式,调用了子类的方法.tryAcquire(1)
@@ -187,7 +187,7 @@ public final void acquire(int arg) {
 
 
 
-```
+```java
 //这里调用了 Sync 类中的 nonfairTryAcquire(); 
 //通过源码对比,公平锁的 tryAcquire 在自己内部实现,为何非公平锁的写在父类呢?
 static final class NonfairSync extends Sync {
@@ -199,7 +199,7 @@ static final class NonfairSync extends Sync {
 
 
 
-```
+```java
 //非公平的模式去获取锁
 abstract static class Sync extends AbstractQueuedSynchronizer {
    
@@ -229,7 +229,7 @@ abstract static class Sync extends AbstractQueuedSynchronizer {
 
 
 
-```
+```java
 //我们假设 tryAcquire(arg) 获取锁失败. 则继续执行 acquireQueued(addWaiter(Node.EXCLUSIVE), arg)方法.
 //在AQS如下实现
 public final void acquire(int arg) {
@@ -241,7 +241,7 @@ public final void acquire(int arg) {
 
 
 
-```
+```java
 //在AQS如下实现 ;
 /**
 * 添加一个等待的节点模式为 EXCLUSIVE .标识为独占模式. 
@@ -286,7 +286,7 @@ private Node enq(final Node node) {
 
 
 
-```
+```java
 //在AQS中实现. 尾部节点的入队
 final boolean acquireQueued(final Node node, int arg) {
     boolean failed = true;
@@ -319,7 +319,7 @@ final boolean acquireQueued(final Node node, int arg) {
 
 ![image-20220714165403447](C:/Users/G006631/Pictures/image-20220714165403447.png)
 
-```
+```java
 //在AQS中
 private static boolean shouldParkAfterFailedAcquire(Node pred, Node node) {
     int ws = pred.waitStatus;
@@ -348,9 +348,79 @@ private static boolean shouldParkAfterFailedAcquire(Node pred, Node node) {
 }
 ```
 
+## 5丶解锁的源码分析
+
+```java
+// reentrantLock 中的sync类 继承自 AbstractQueuedSynchronizer. 
+public void unlock() {
+    sync.release(1);
+}
+```
+
+```java
+//AbstractQueuedSynchronizer
+public final boolean release(int arg) {
+    //使用模板设计模式.  调用子类实现的方法
+    if (tryRelease(arg)) {
+        //若释放锁成功,拿到头结点
+        Node h = head;
+        //通过枷锁的源码分析,只要有并发,且有线程存在等待.  waitStatus必然不能为0,故肯定进去这个方法
+        if (h != null && h.waitStatus != 0)
+            //通知头结点的下个节点,去继续执行,去获取锁.  因为阻塞的节点线程是头结点的下个线程
+            // 1丶初始化时,头结点为 new node();  抢占锁为他的子节点阻塞
+			// 2丶非初始化时, 头结点设置为抢占锁的节点.(执行程序,并不会阻塞.)  
+            //头结点可以理解为(初始化时不是),拿到锁的节点
+            unparkSuccessor(h);
+        return true;
+    }
+    return false;
+}
+
+private void unparkSuccessor(Node node) {
+        /*
+         * 清楚头结点标识.  为0时, 下个节点可以尝试获取锁,2次, 否则,则1次就进入等待. 这里就算更新失败也是可以的,
+       	 *          只是会提前进入阻塞
+         */
+        int ws = node.waitStatus;
+        if (ws < 0)
+            compareAndSetWaitStatus(node, ws, 0);
+
+        /*
+          * 拿到下个节点.
+         */
+        Node s = node.next;
+        if (s == null || s.waitStatus > 0) {
+            s = null;
+            for (Node t = tail; t != null && t != node; t = t.prev)
+                if (t.waitStatus <= 0)
+                    s = t;
+        }
+        if (s != null)
+            LockSupport.unpark(s.thread);
+    }
+```
 
 
-## 5丶至此. 非公平锁分析完毕. 公平锁大部分同非公平锁代码,不做分析.
+
+```java
+//尝试释放锁. 必须是枷锁的线程释放
+protected final boolean tryRelease(int releases) {
+    int c = getState() - releases;
+    //如果释放锁,和占有锁的线程不一致, 直接报错
+    if (Thread.currentThread() != getExclusiveOwnerThread())
+        throw new IllegalMonitorStateException();
+    boolean free = false;
+    //释放成功
+    if (c == 0) {
+        free = true;
+        setExclusiveOwnerThread(null);
+    }
+    setState(c);
+    return free;
+}
+```
+
+## 6丶至此. 非公平锁分析完毕. 公平锁大部分同非公平锁代码,不做分析.
 
 
 
