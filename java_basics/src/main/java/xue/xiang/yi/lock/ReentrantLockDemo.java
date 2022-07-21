@@ -1,4 +1,4 @@
-package xue.xiang.yi;
+package xue.xiang.yi.lock;
 
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
