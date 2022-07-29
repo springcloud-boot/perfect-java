@@ -8,8 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import xue.xiang.yi.notice.deal.DealInterface;
-import xue.xiang.yi.notice.deal.DefaultDeal;
 
 import java.lang.reflect.Method;
 import java.util.List;
@@ -24,8 +22,8 @@ import java.util.List;
 public class DangerNoticeAspect {
     public final static Logger logBiz = LoggerFactory.getLogger("logger_biz");
 
-    @Autowired
-    private List<DealInterface> dealInterfaces;
+//    @Autowired
+//    private List<DealInterface> dealInterfaces;
 
     @Around("@annotation(cc.eslink.paycenter.gateway.notice.DangerNotice)")
     public Object orderAround(ProceedingJoinPoint joinPoint) throws Throwable {
@@ -36,7 +34,7 @@ public class DangerNoticeAspect {
         //获得方法上面的注解
         DangerNotice dangerNotice = method.getAnnotation(DangerNotice.class);
         // ****真正执行记录异常的类**** 重点步骤
-        DealInterface realDealInterface = getRealDealClass(dangerNotice.methodType());
+//        DealInterface realDealInterface = getRealDealClass(dangerNotice.methodType());
 
         long startTime = System.currentTimeMillis();
         Object proceed = null;
@@ -44,7 +42,7 @@ public class DangerNoticeAspect {
             proceed = joinPoint.proceed();
         } catch (Exception e) {
             try {
-                realDealInterface.errorDispose(null);
+//                realDealInterface.errorDispose(null);
             } catch (Exception e1) {
                 logBiz.error("入库报错的异常失败", e);
             }
@@ -77,14 +75,14 @@ public class DangerNoticeAspect {
      * @param methodType
      * @return
      */
-    private DealInterface getRealDealClass(String methodType) {
-        for (DealInterface dealInterface : dealInterfaces) {
-            if (dealInterface.isSupport(methodType)) {
-                return dealInterface;
-            }
-        }
-        return new DefaultDeal();
-    }
+//    private DealInterface getRealDealClass(String methodType) {
+//        for (DealInterface dealInterface : dealInterfaces) {
+//            if (dealInterface.isSupport(methodType)) {
+//                return dealInterface;
+//            }
+//        }
+//        return new DefaultDeal();
+//    }
 
 
 }

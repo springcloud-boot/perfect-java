@@ -15,5 +15,5 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 public @interface DangerNotice {
     public int timeOutMillisecond() default 60000;
-    public String methodType() default MethodTypeConstant.OWNER_ORDER;
+    public String methodType() ;
 }
