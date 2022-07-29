@@ -8,6 +8,7 @@ import java.util.ServiceLoader;
  */
 public class JavaSpi {
     public static void main(String[] args) {
+        //内部使用Thread.currentThread().getContextClassLoader(); 打破双亲委派原则
         ServiceLoader<Person> load = ServiceLoader.load(Person.class);
         for (Person person : load) {
             person.say();
