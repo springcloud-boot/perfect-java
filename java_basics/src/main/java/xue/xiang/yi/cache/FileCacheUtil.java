@@ -34,7 +34,7 @@ public class FileCacheUtil {
         fileOutputStream.write((bufferStr + splitStr).getBytes());
         fileOutputStream.flush();
         fileOutputStream.close();
-        System.out.println("我写完比人才能写 哈哈");
+        System.out.println("我写完别人才能写 哈哈");
         return true;
     }
 

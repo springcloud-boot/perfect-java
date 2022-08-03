@@ -12,6 +12,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class MyCacheTest {
     public static void main(String[] args) throws IOException {
+        FileCacheUtil.write("ca.txt", "aaa");
         String[] read = FileCacheUtil.read("ca.txt");
         for (int i = 0; i < read.length; i++) {
             System.out.println(read[i]);
