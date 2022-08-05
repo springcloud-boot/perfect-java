@@ -11,7 +11,7 @@ public class ServerHandler
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg)
             throws Exception {
-        System.out.println("Client Address ====== " + ctx.channel().remoteAddress()+ msg);
+        System.out.println("Client Address ====== " + ctx.channel().remoteAddress()+ msg+ "--"+Thread.currentThread().getName());
         ctx.channel().writeAndFlush("from server:" + UUID.randomUUID());
         TimeUnit.MILLISECONDS.sleep(500);
     }

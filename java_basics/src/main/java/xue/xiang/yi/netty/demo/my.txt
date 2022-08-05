@@ -1,0 +1,8 @@
+主要根据serverBootstrap.group() 绑定的2个executor来决定模型.
+
+
+EventLoopGroup 其实就是一个线程池. 自己有一个execute方法,  自己内部有一个Excutor.  总共2个线程池.
+底层依赖服务器的selector环境阻塞.
+
+核心源码 EventLoopGroup(),创建过程.
+serverBootstrap.bind() 绑定过程
