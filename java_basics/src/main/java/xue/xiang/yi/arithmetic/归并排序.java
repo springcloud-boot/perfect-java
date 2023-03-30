@@ -3,6 +3,7 @@ package xue.xiang.yi.arithmetic;
 import com.alibaba.fastjson.JSON;
 
 import java.util.Arrays;
+import java.util.Random;
 
 /**
  * @author : 薛向毅
@@ -11,16 +12,21 @@ import java.util.Arrays;
 public class 归并排序 {
     public static void main(String[] args) {
         归并排序 mersort = new 归并排序();
-        int[] needSortArr = {51, 45325, 765, 213, 765, 89, 3, 34, 7567, 3, 65, 2312, 7678, 786, 213};
-        int[] ints = mersort.mergeSort(needSortArr);
-        System.out.println(JSON.toJSONString(ints));
+        int[] needSortArr = new int[1000000];
+        for (int i = 0; i < 1000000; i++) {
+            needSortArr[i] = new Random().nextInt(1000000);
+        }
+        long l = System.currentTimeMillis();
+        mersort.mergeSort(needSortArr);
+        System.out.println(System.currentTimeMillis() -l);
+//        System.out.println(JSON.toJSONString(needSortArr));
     }
 
     //分而治之
-    public int[] mergeSort(int[] arr) {
+    public void mergeSort(int[] arr) {
 
          merge_sort(arr, 0, arr.length - 1);
-        return arr;
+        return ;
     }
 
 
