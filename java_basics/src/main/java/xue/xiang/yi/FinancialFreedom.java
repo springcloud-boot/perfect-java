@@ -1,5 +1,10 @@
 package xue.xiang.yi;
 
+import com.alibaba.fastjson.JSON;
+
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * @author : 薛向毅
  * @date : 10:25 2023/3/10
@@ -9,7 +14,7 @@ package xue.xiang.yi;
 public class FinancialFreedom {
     public static void main(String[] args) throws InterruptedException {
         double annualized = 0.0029;
-        double startMoney = 30000;
+        double startMoney = 32000;
         double saveMoney = 3300;
 
         int i = 0;
